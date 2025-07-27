@@ -1,4 +1,4 @@
-function exportJSON(data, filename) {
+export function exportJSON(data, filename) {
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -12,7 +12,7 @@ function exportJSON(data, filename) {
     URL.revokeObjectURL(url);
 }
 
-function importJSON(file, callback) {
+export function importJSON(file, callback) {
     const reader = new FileReader();
     reader.onload = (event) => {
         try {

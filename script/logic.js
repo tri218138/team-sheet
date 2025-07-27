@@ -1,4 +1,4 @@
-function calculate(expenses, members) {
+export function calculate(expenses, members) {
     const summary = {};
     members.forEach(member => {
         summary[member] = { paid: 0, used: 0 };
