@@ -17,14 +17,20 @@ export function renderMemberNameInputs(members, onNameChange) {
 }
 
 export function renderExpenseTableHeaders(members) {
-    const headerRow = document.querySelector('#expense-table thead tr');
-    while (headerRow.children.length > 3) {
-        headerRow.removeChild(headerRow.lastChild);
-    }
+    const groupHeader = document.getElementById('users-header-group');
+    const memberHeaderRow = document.getElementById('member-header-row');
+
+    // Xóa các tên thành viên cũ
+    memberHeaderRow.innerHTML = '';
+
+    // Cập nhật colspan cho header nhóm
+    groupHeader.setAttribute('colspan', members.length > 0 ? members.length : 1);
+
+    // Thêm các tên thành viên mới
     members.forEach(member => {
         const th = document.createElement('th');
         th.textContent = member;
-        headerRow.appendChild(th);
+        memberHeaderRow.appendChild(th);
     });
 }
 
