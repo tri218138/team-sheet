@@ -46,7 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     calculateBtn.addEventListener('click', () => {
+        if (!validateAllExpenseRows()) {
+            return; // Dừng lại nếu xác thực thất bại
+        }
+
         const expenses = getExpensesFromTable();
+        if (expenses.length === 0) {
+            alert("Không có chi tiêu hợp lệ nào để tính toán.");
+            // Xóa kết quả cũ (nếu có)
+            document.querySelector('#summary-table tbody').innerHTML = '';
+            document.getElementById('transactions').innerHTML = '';
+            return;
+        }
+
         const { summary, transactions } = calculate(expenses, members);
         renderSummaryTable(summary);
         renderTransactions(transactions);
@@ -205,6 +217,48 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = document.querySelector('#expense-table tbody');
         tbody.innerHTML = '';
         expenses.forEach(expense => addExpenseRow(expense));
+    }
+
+    function validateAllExpenseRows() {
+        const rows = document.querySelectorAll('#expense-table tbody tr');
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const description = row.querySelector('.description').value.trim();
+            const amountValue = row.querySelector('.amount').value.trim();
+            const amount = parseFloat(amountValue);
+
+            const usedByCheckboxes = row.querySelectorAll('.usedBy');
+            let usedByCount = 0;
+            usedByCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    usedByCount++;
+                }
+            });
+
+            // Bỏ qua các dòng trống hoàn toàn
+            if (!description && !amountValue) {
+                continue;
+            }
+
+            // Xác thực nội dung cho các dòng không trống
+            if (!description) {
+                alert(`Lỗi ở Dòng ${i + 1}: Vui lòng nhập nội dung chi tiêu.`);
+                return false;
+            }
+
+            // Xác thực số tiền cho các dòng không trống
+            if (!amountValue || isNaN(amount) || amount <= 0) {
+                alert(`Lỗi ở Dòng ${i + 1}: Vui lòng nhập số tiền hợp lệ (phải là số lớn hơn 0).`);
+                return false;
+            }
+
+            // Xác thực người dùng cho các dòng không trống
+            if (usedByCount === 0) {
+                alert(`Lỗi ở Dòng ${i + 1}: Cần có ít nhất một người dùng cho chi phí này.`);
+                return false;
+            }
+        }
+        return true;
     }
 
     function getExpensesFromTable() {
