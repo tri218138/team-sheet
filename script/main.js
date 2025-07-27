@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculate-btn');
     const exportBtn = document.getElementById('export-json-btn');
     const importInput = document.getElementById('import-json-input');
+    const expenseTableBody = document.querySelector('#expense-table tbody');
 
     // ----- Event Handlers -----
     createMembersBtn.addEventListener('click', handleMemberCountChange);
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateBtn.addEventListener('click', handleCalculate);
     exportBtn.addEventListener('click', handleExport);
     importInput.addEventListener('change', handleImport);
+    expenseTableBody.addEventListener('click', handleDeleteRow);
 
     // ----- Handler Functions -----
     function handleMemberCountChange() {
@@ -97,6 +99,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 numMembersInput.value = appState.members.length;
                 updateAndRender();
             });
+        }
+    }
+
+    function handleDeleteRow(event) {
+        if (event.target.classList.contains('delete-btn')) {
+            const row = event.target.closest('tr');
+            const rowIndex = Array.from(expenseTableBody.children).indexOf(row);
+            
+            // Xóa khỏi trạng thái
+            appState.expenses.splice(rowIndex, 1);
+            
+            // Cập nhật và vẽ lại
+            updateAndRender();
         }
     }
 

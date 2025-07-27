@@ -114,3 +114,17 @@ button:hover {
 #transactions p {
     margin: 5px 0;
 }
+
+.delete-btn {
+    background-color: #e74c3c; /* Màu đỏ */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}

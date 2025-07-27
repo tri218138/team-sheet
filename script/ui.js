@@ -91,6 +91,13 @@ function addExpenseRow(expenseData, members, onRowChange) {
         checkbox.checked = expense.usedBy.includes(member);
         cell.appendChild(checkbox);
     });
+
+    // Thêm nút xóa
+    const deleteCell = row.insertCell();
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Xóa';
+    deleteBtn.className = 'delete-btn';
+    deleteCell.appendChild(deleteBtn);
 }
 
 export function addBlankExpenseRow(members, onRowChange) {
