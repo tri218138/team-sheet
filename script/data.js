@@ -1,27 +1,29 @@
+import { t } from './i18n.js';
+
 const APP_STORAGE_KEY = 'teamSheetData';
 
 // Trạng thái mặc định của ứng dụng
-const defaultState = {
-    members: ['Thành viên 1', 'Thành viên 2', 'Thành viên 3'],
-    expenses: [{ description: '', amount: '', paidBy: 'Thành viên 1', usedBy: [] }]
-};
+const getDefaultState = () => ({
+    members: [t('default_member_name', {number: 1}), t('default_member_name', {number: 2}), t('default_member_name', {number: 3})],
+    expenses: [{ description: '', amount: '', paidBy: t('default_member_name', {number: 1}), usedBy: [] }]
+});
 
 // Hàm tải trạng thái từ LocalStorage
 export function loadState() {
     try {
         const serializedState = localStorage.getItem(APP_STORAGE_KEY);
         if (serializedState === null) {
-            return defaultState; // Trả về trạng thái mặc định nếu không có gì trong storage
+            return getDefaultState(); // Trả về trạng thái mặc định nếu không có gì trong storage
         }
         const storedState = JSON.parse(serializedState);
         // Đảm bảo dữ liệu tải lên có cấu trúc hợp lệ
         return {
-            members: storedState.members || defaultState.members,
-            expenses: storedState.expenses || defaultState.expenses
+            members: storedState.members || getDefaultState().members,
+            expenses: storedState.expenses || getDefaultState().expenses
         };
     } catch (err) {
         console.error("Lỗi khi tải trạng thái từ LocalStorage:", err);
-        return defaultState; // Trả về trạng thái mặc định nếu có lỗi
+        return getDefaultState(); // Trả về trạng thái mặc định nếu có lỗi
     }
 }
 

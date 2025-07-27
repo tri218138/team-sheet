@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chia tiền nhóm</title>
+    <title data-i18n-key="appTitle">Chia tiền nhóm</title>
     <link rel="stylesheet" href="style/main.css">
 </head>
 <body>
     <header>
-        <h1>Chi tiêu nhóm</h1>
-        <p>Ghi chú: (+) là tiền đã bỏ ra, (-) là tiền nhận lại.</p>
+        <div id="lang-switcher">
+            <button data-lang="vi">VI</button>
+            <button data-lang="en">EN</button>
+        </div>
+        <h1 data-i18n-key="appTitle">Chi tiêu nhóm</h1>
+        <p data-i18n-key="note">Ghi chú: (+) là tiền đã bỏ ra, (-) là tiền nhận lại.</p>
         <div class="creator-info">
-            <span>Created by: <a href="https://github.com/tri218138" target="_blank">tri218138</a></span>
+            <span data-i18n-key="createdBy">Tạo bởi:</span> <a href="https://github.com/tri218138" target="_blank">tri218138</a>
             <iframe
                 src="https://ghbtns.com/github-btn.html?user=tri218138&repo=team-sheet&type=star&count=true&size=large"
                 frameborder="0" scrolling="0" width="170px" height="30px" title="GitHub"></iframe>
@@ -20,69 +24,68 @@
 
     <main>
         <section id="setup">
-            <h2>Thiết lập</h2>
+            <h2 data-i18n-key="setup">Thiết lập</h2>
             <div>
-                <label for="num-members">Nhập số thành viên:</label>
+                <label for="num-members" data-i18n-key="numMembersLabel">Nhập số thành viên:</label>
                 <input type="number" id="num-members" min="2" value="3">
-                <button id="create-members-btn">Tạo bảng</button>
+                <button id="create-members-btn" data-i18n-key="createTableBtn">Tạo bảng</button>
             </div>
             <div id="members-names"></div>
         </section>
 
         <section id="expense-table-section">
-            <h2>Bảng chi tiêu</h2>
+            <h2 data-i18n-key="expenseTable">Bảng chi tiêu</h2>
             <table id="expense-table">
                 <thead>
                     <tr>
-                        <th rowspan="2">Nội dung</th>
-                        <th rowspan="2">Số tiền</th>
-                        <th rowspan="2">Người trả</th>
-                        <th id="users-header-group" colspan="3">Người dùng</th>
-                        <th rowspan="2"></th>
+                        <th rowspan="2" data-i18n-key="descriptionHeader">Nội dung</th>
+                        <th rowspan="2" data-i18n-key="amountHeader">Số tiền</th>
+                        <th rowspan="2" data-i18n-key="paidByHeader">Người trả</th>
+                        <th id="users-header-group" colspan="3" data-i18n-key="usersHeader">Người dùng</th>
+                        <th rowspan="2" data-i18n-key="actionsHeader"></th>
                     </tr>
                     <tr id="member-header-row">
-                        <!-- Tên thành viên sẽ được chèn vào đây -->
+                        <!-- Member names will be inserted here -->
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Dòng chi tiêu sẽ được thêm vào đây -->
+                    <!-- Expense rows will be added here -->
                 </tbody>
             </table>
-            <button id="add-row-btn">Thêm dòng</button>
+            <button id="add-row-btn" data-i18n-key="addRowBtn">Thêm dòng</button>
         </section>
 
         <section id="summary-section">
-            <h2>Kết quả chia tiền</h2>
-            <button id="calculate-btn">Tính toán</button>
+            <h2 data-i18n-key="summaryTitle">Kết quả chia tiền</h2>
+            <button id="calculate-btn" data-i18n-key="calculateBtn">Tính toán</button>
             <table id="summary-table">
                 <thead>
                     <tr>
-                        <th>Thành viên</th>
-                        <th>Đã trả</th>
-                        <th>Đã dùng</th>
-                        <th>Cần trả thêm (+) / Nhận lại (-)</th>
+                        <th data-i18n-key="memberHeader">Thành viên</th>
+                        <th data-i18n-key="paidHeader">Đã trả</th>
+                        <th data-i18n-key="usedHeader">Đã dùng</th>
+                        <th data-i18n-key="balanceHeader">Cần trả thêm (+) / Nhận lại (-)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Kết quả sẽ được hiển thị ở đây -->
+                    <!-- Summary results will be displayed here -->
                 </tbody>
             </table>
         </section>
         
         <section id="transaction-suggestion-section">
-            <h2>Gợi ý chuyển tiền</h2>
+            <h2 data-i18n-key="transactionSuggestionTitle">Gợi ý chuyển tiền</h2>
             <div id="transactions">
-                <!-- Gợi ý chuyển tiền tối ưu sẽ ở đây -->
+                <!-- Transaction suggestions will be here -->
             </div>
         </section>
 
         <section id="file-operations">
-            <h2>Thao tác với File</h2>
-            <button id="export-json-btn">Xuất JSON</button>
-            <label for="import-json-input" class="file-label">Nhập JSON</label>
+            <h2 data-i18n-key="fileOperationsTitle">Thao tác với File</h2>
+            <button id="export-json-btn" data-i18n-key="exportJsonBtn">Xuất JSON</button>
+            <label for="import-json-input" class="file-label" data-i18n-key="importJsonBtn">Nhập JSON</label>
             <input type="file" id="import-json-input" accept=".json">
         </section>
-
     </main>
 
     <script type="module" src="script/main.js"></script>

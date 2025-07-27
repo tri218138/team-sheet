@@ -12,19 +12,18 @@ export function exportJSON(data, filename) {
     URL.revokeObjectURL(url);
 }
 
-export function importJSON(file, callback) {
+export function importJSON(file, callback, onError) {
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
             const data = JSON.parse(event.target.result);
-            if (data && data.members && data.expenses) {
-                callback(data);
-            } else {
-                alert('File JSON không hợp lệ.');
-            }
+            callback(data);
         } catch (error) {
-            alert('Lỗi khi đọc file JSON: ' + error.message);
+            onError(error);
         }
     };
+    reader.onerror = () => {
+        onError(new Error("Failed to read file."));
+    }
     reader.readAsText(file);
 }

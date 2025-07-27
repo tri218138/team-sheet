@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 export function renderMemberNameInputs(members, onNameChange) {
     const container = document.getElementById('members-names');
     container.innerHTML = '';
@@ -5,7 +7,7 @@ export function renderMemberNameInputs(members, onNameChange) {
         const div = document.createElement('div');
         div.className = 'member-name-input';
         const label = document.createElement('label');
-        label.textContent = `Tên thành viên ${index + 1}:`;
+        label.textContent = t('memberNameLabel', { number: index + 1 });
         const input = document.createElement('input');
         input.type = 'text';
         input.value = name;
@@ -122,12 +124,12 @@ export function renderTransactions(transactions) {
     const container = document.getElementById('transactions');
     container.innerHTML = '';
     if (transactions.length === 0) {
-        container.innerHTML = '<p>Không có giao dịch nào cần thực hiện.</p>';
+        container.innerHTML = `<p>${t('noTransactions')}</p>`;
         return;
     }
-    transactions.forEach(t => {
+    transactions.forEach(transaction => {
         const p = document.createElement('p');
-        p.textContent = `${t.from} chuyển cho ${t.to}: ${t.amount.toFixed(2)}`;
+        p.textContent = t('transactionFormat', { from: transaction.from, to: transaction.to, amount: transaction.amount.toFixed(2) });
         container.appendChild(p);
     });
 }
@@ -170,15 +172,15 @@ export function validateAllExpenseRows() {
         if (!description && !amountValue) continue;
 
         if (!description) {
-            alert(`Lỗi ở Dòng ${i + 1}: Vui lòng nhập nội dung chi tiêu.`);
+            alert(t('alert_invalid_expense_row', { row: i + 1 }));
             return false;
         }
         if (!amountValue || isNaN(amount) || amount <= 0) {
-            alert(`Lỗi ở Dòng ${i + 1}: Vui lòng nhập số tiền hợp lệ (lớn hơn 0).`);
+            alert(t('alert_invalid_amount', { row: i + 1 }));
             return false;
         }
         if (usedByCount === 0) {
-            alert(`Lỗi ở Dòng ${i + 1}: Cần có ít nhất một người dùng cho chi phí này.`);
+            alert(t('alert_no_user', { row: i + 1 }));
             return false;
         }
     }

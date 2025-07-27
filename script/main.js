@@ -2,9 +2,11 @@ import { calculate } from './logic.js';
 import { exportJSON, importJSON } from './export.js';
 import { loadState, saveState } from './data.js';
 import * as UI from './ui.js';
+import { initI18n, t } from './i18n.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    const appState = loadState();
+document.addEventListener('DOMContentLoaded', async () => {
+    const { setLanguage, getLanguage, translatePage } = await initI18n();
+    let appState = loadState();
 
     // ----- DOM Elements -----
     const createMembersBtn = document.getElementById('create-members-btn');
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportBtn = document.getElementById('export-json-btn');
     const importInput = document.getElementById('import-json-input');
     const expenseTableBody = document.querySelector('#expense-table tbody');
+    const langSwitcher = document.getElementById('lang-switcher');
 
     // ----- Event Handlers -----
     createMembersBtn.addEventListener('click', handleMemberCountChange);
@@ -22,18 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
     exportBtn.addEventListener('click', handleExport);
     importInput.addEventListener('change', handleImport);
     expenseTableBody.addEventListener('click', handleDeleteRow);
+    langSwitcher.addEventListener('click', handleLangSwitch);
 
     // ----- Handler Functions -----
     function handleMemberCountChange() {
         const newSize = parseInt(numMembersInput.value, 10);
         if (newSize < 1) {
-            alert("Số thành viên phải lớn hơn 0.");
+            alert(t('alert_invalid_members'));
             return;
         }
         const oldSize = appState.members.length;
         if (newSize === oldSize) return;
 
-        const newMembers = Array.from({ length: newSize }, (_, i) => appState.members[i] || `Thành viên ${i + 1}`);
+        const newMembers = Array.from({ length: newSize }, (_, i) => appState.members[i] || t('default_member_name', { number: i + 1 }));
         appState.members = newMembers;
 
         if (newSize < oldSize) {
@@ -50,11 +54,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleNameChange(index, newName) {
         const oldName = appState.members[index];
-        if (!newName.trim() || appState.members.some((m, i) => m === newName && i !== index)) {
-            alert("Tên thành viên không hợp lệ hoặc đã tồn tại.");
+        if (!newName.trim()) {
+            alert(t('alert_empty_name'));
             renderUI(); // Re-render to reset invalid input
             return;
         }
+        if (appState.members.some((m, i) => m === newName && i !== index)) {
+            alert(t('alert_duplicate_name'));
+            renderUI();
+            return;
+        }
+        
         appState.members[index] = newName.trim();
         appState.expenses.forEach(exp => {
             if (exp.paidBy === oldName) exp.paidBy = newName;
@@ -78,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const validExpenses = UI.getExpensesFromTable(appState.members).filter(e => e.description && e.amount > 0);
         if (validExpenses.length === 0) {
-            alert("Vui lòng nhập ít nhất một chi tiêu hợp lệ.");
+            alert(t('alert_no_valid_expense'));
             return;
         }
         
@@ -95,9 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = event.target.files[0];
         if (file) {
             importJSON(file, data => {
+                if (!data.members || !data.expenses) {
+                    alert(t('alert_invalid_json'));
+                    return;
+                }
                 Object.assign(appState, data);
                 numMembersInput.value = appState.members.length;
                 updateAndRender();
+            }, error => {
+                alert(t('alert_json_read_error', { error: error.message }));
             });
         }
     }
@@ -115,6 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function handleLangSwitch(event) {
+        const newLang = event.target.dataset.lang;
+        if (newLang && newLang !== getLanguage()) {
+            setLanguage(newLang);
+            location.reload(); // Reload to apply new language fully
+        }
+    }
+
     // ----- Render & Update -----
     function updateAndRender() {
         saveState(appState);
@@ -125,6 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.renderMemberNameInputs(appState.members, handleNameChange);
         UI.renderExpenseTableHeaders(appState.members);
         UI.renderExpenseTableRows(appState.expenses, appState.members, handleTableRowChange);
+        updateLangSwitcher();
+    }
+
+    function updateLangSwitcher() {
+        const currentLang = getLanguage();
+        langSwitcher.querySelectorAll('button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === currentLang);
+        });
     }
 
     // ----- Initial Load -----
