@@ -128,3 +128,11 @@ button:hover {
 .delete-btn:hover {
     background-color: #c0392b;
 }
+
+.creator-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
