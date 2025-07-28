@@ -3,6 +3,7 @@ import { exportJSON, importJSON } from './export.js';
 import { loadState, saveState } from './data.js';
 import * as UI from './ui.js';
 import { initI18n, t } from './i18n.js';
+import { downloadPDF, downloadExcel } from './download.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { setLanguage, getLanguage, translatePage } = await initI18n();
@@ -17,6 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const importInput = document.getElementById('import-json-input');
     const expenseTableBody = document.querySelector('#expense-table tbody');
     const langSwitcher = document.getElementById('lang-switcher');
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
+    const downloadExcelBtn = document.getElementById('download-excel-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
 
     // ----- Event Handlers -----
     createMembersBtn.addEventListener('click', handleMemberCountChange);
@@ -26,6 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     importInput.addEventListener('change', handleImport);
     expenseTableBody.addEventListener('click', handleDeleteRow);
     langSwitcher.addEventListener('click', handleLangSwitch);
+    downloadPdfBtn.addEventListener('click', () => downloadPDF(appState, t));
+    downloadExcelBtn.addEventListener('click', () => downloadExcel(appState, t));
+    clearAllBtn.addEventListener('click', handleClearAll);
 
     // ----- Handler Functions -----
     function handleMemberCountChange() {
@@ -128,6 +135,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Cập nhật và vẽ lại
             updateAndRender();
+        }
+    }
+
+    function handleClearAll() {
+        if (confirm(t('alert_clear_all_confirm'))) {
+            localStorage.removeItem('teamSheetData'); // Xóa khỏi LocalStorage
+            localStorage.removeItem('i18next_lng'); // Tùy chọn: reset ngôn ngữ
+            location.reload();
         }
     }
 

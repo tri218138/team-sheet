@@ -154,3 +154,23 @@ button:hover {
     background-color: #3498db;
     color: white;
 }
+
+.file-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.file-buttons .danger {
+    background-color: #e74c3c;
+}
+
+.file-buttons .danger:hover {
+    background-color: #c0392b;
+}
+
+.note {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 10px;
+}
