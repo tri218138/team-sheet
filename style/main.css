@@ -174,3 +174,7 @@ button:hover {
     color: #7f8c8d;
     margin-top: 10px;
 }
+
+#download-excel-btn {
+    display: none;
+}

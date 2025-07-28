@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     importInput.addEventListener('change', handleImport);
     expenseTableBody.addEventListener('click', handleDeleteRow);
     langSwitcher.addEventListener('click', handleLangSwitch);
-    downloadPdfBtn.addEventListener('click', () => downloadPDF(appState, t));
+    downloadPdfBtn.addEventListener('click', () => downloadPDF(appState));
     downloadExcelBtn.addEventListener('click', () => downloadExcel(appState, t));
     clearAllBtn.addEventListener('click', handleClearAll);
 

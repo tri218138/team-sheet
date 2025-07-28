@@ -1,95 +1,118 @@
+import { calculate } from './logic.js';
+import * as UI from './ui.js';
 
-export function downloadPDF(appState, t) {
+// Tải file dịch tiếng Anh một cách độc lập
+async function getEnglishTranslations() {
+    try {
+        const response = await fetch('locales/en.json');
+        if (!response.ok) throw new Error('Failed to fetch English translations');
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return {}; // Trả về object rỗng nếu lỗi
+    }
+}
+
+// Tạo một hàm dịch cục bộ để sử dụng cho báo cáo
+function createTranslator(translations) {
+    return function t(key, replacements = {}) {
+        let text = translations[key] || key;
+        for (const placeholder in replacements) {
+            text = text.replace(`{${placeholder}}`, replacements[placeholder]);
+        }
+        return text;
+    };
+}
+
+function getReportData(appState, t) {
+    const validExpenses = UI.getExpensesFromTable(appState.members).filter(e => e.description && e.amount > 0);
+    const { summary, transactions } = calculate(validExpenses, appState.members);
+
+    const expenseData = validExpenses.map(e => ({
+        [t('descriptionHeader')]: e.description,
+        [t('amountHeader')]: e.amount.toFixed(2),
+        [t('paidByHeader')]: e.paidBy,
+        [t('usersHeader')]: e.usedBy.join(', ')
+    }));
+
+    const summaryData = Object.entries(summary).map(([member, data]) => ({
+        [t('memberHeader')]: member,
+        [t('paidHeader')]: data.paid.toFixed(2),
+        [t('usedHeader')]: data.used.toFixed(2),
+        [t('balanceHeader')]: (data.used - data.paid).toFixed(2)
+    }));
+    
+    const transactionData = transactions.map(trans => ({
+        "transaction": t('transactionFormat', {
+            from: trans.from,
+            to: trans.to,
+            amount: trans.amount.toFixed(2)
+        })
+    }));
+
+    return { expenseData, summaryData, transactionData };
+}
+
+export async function downloadPDF(appState) {
+    const translations = await getEnglishTranslations();
+    const t = createTranslator(translations); // FIX: Tạo hàm t từ đối tượng dịch
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    const { expenseData, summaryData, transactionData } = getReportData(appState, t);
 
-    doc.setFont("helvetica", "bold");
-    doc.text(t('appTitle'), 14, 20);
+    // Set font to one that supports Vietnamese
+    doc.setFont("Arimo-Regular");
 
-    // Bảng chi tiêu
-    doc.setFont("helvetica", "normal");
-    const expenseHeaders = [
-        t('descriptionHeader'),
-        t('amountHeader'),
-        t('paidByHeader'),
-        t('usersHeader')
-    ];
-    const expenseBody = appState.expenses
-        .filter(e => e.description && e.amount > 0)
-        .map(e => [
-            e.description,
-            e.amount,
-            e.paidBy,
-            e.usedBy.join(', ')
-        ]);
+    // Title
+    doc.setFontSize(20);
+    doc.text(t('appTitle'), 14, 22);
+    doc.setFontSize(12);
 
+    // Expenses Table
+    doc.text(t('expenseTable'), 14, 35);
     doc.autoTable({
-        head: [expenseHeaders],
-        body: expenseBody,
-        startY: 30,
-        headStyles: { fillColor: [22, 160, 133] },
+        startY: 40,
+        head: [Object.keys(expenseData[0] || {})],
+        body: expenseData.map(Object.values),
+        styles: { font: "Arimo-Regular" }
     });
 
-    // Bảng tổng kết
-    const finalY = doc.autoTable.previous.finalY;
-    const summaryHeaders = [
-        t('memberHeader'),
-        t('paidHeader'),
-        t('usedHeader'),
-        t.balanceHeader
-    ];
-    const summaryBody = appState.members.map(member => {
-        const paid = appState.expenses
-            .filter(e => e.paidBy === member)
-            .reduce((sum, e) => sum + e.amount, 0);
-        const used = appState.expenses
-            .filter(e => e.usedBy.includes(member))
-            .reduce((sum, e) => sum + (e.amount / e.usedBy.length), 0);
-        return [member, paid.toFixed(2), used.toFixed(2), (used - paid).toFixed(2)];
-    });
-    
+    // Summary Table
+    let finalY = doc.autoTable.previous.finalY;
+    doc.text(t('summaryTitle'), 14, finalY + 15);
     doc.autoTable({
-        head: [summaryHeaders],
-        body: summaryBody,
-        startY: finalY + 10
+        startY: finalY + 20,
+        head: [Object.keys(summaryData[0] || {})],
+        body: summaryData.map(Object.values),
+        styles: { font: "Arimo-Regular" }
     });
-    
-    doc.save('team-sheet.pdf');
+
+    // Transactions
+    finalY = doc.autoTable.previous.finalY;
+    doc.text(t('transactionSuggestionTitle'), 14, finalY + 15);
+    doc.autoTable({
+        startY: finalY + 20,
+        head: [[t('transactionSuggestionTitle')]],
+        body: transactionData.map(Object.values),
+        styles: { font: "Arimo-Regular" }
+    });
+
+    doc.save('team-sheet-report.pdf');
 }
 
 export function downloadExcel(appState, t) {
+    const { expenseData, summaryData, transactionData } = getReportData(appState, t);
     const wb = XLSX.utils.book_new();
 
-    // Sheet chi tiêu
-    const expenseData = appState.expenses
-        .filter(e => e.description && e.amount > 0)
-        .map(e => ({
-            [t('descriptionHeader')]: e.description,
-            [t('amountHeader')]: e.amount,
-            [t('paidByHeader')]: e.paidBy,
-            [t('usersHeader')]: e.usedBy.join(', ')
-        }));
     const wsExpenses = XLSX.utils.json_to_sheet(expenseData);
     XLSX.utils.book_append_sheet(wb, wsExpenses, t('expenseTable'));
 
-    // Sheet tổng kết
-    const summaryData = appState.members.map(member => {
-         const paid = appState.expenses
-            .filter(e => e.paidBy === member)
-            .reduce((sum, e) => sum + e.amount, 0);
-        const used = appState.expenses
-            .filter(e => e.usedBy.includes(member))
-            .reduce((sum, e) => sum + (e.amount / e.usedBy.length), 0);
-        return {
-            [t('memberHeader')]: member,
-            [t('paidHeader')]: paid.toFixed(2),
-            [t('usedHeader')]: used.toFixed(2),
-            [t('balanceHeader')]: (used - paid).toFixed(2)
-        };
-    });
     const wsSummary = XLSX.utils.json_to_sheet(summaryData);
     XLSX.utils.book_append_sheet(wb, wsSummary, t('summaryTitle'));
+    
+    const wsTransactions = XLSX.utils.json_to_sheet(transactionData);
+    XLSX.utils.book_append_sheet(wb, wsTransactions, t('transactionSuggestionTitle'));
 
-    XLSX.writeFile(wb, 'team-sheet.xlsx');
+    XLSX.writeFile(wb, 'team-sheet-report.xlsx');
 }
 
